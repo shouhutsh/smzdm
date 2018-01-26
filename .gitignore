@@ -1,0 +1,9 @@
+# 忽略项目 iml 文件
+*.iml
+# 忽略编辑器.idea文件夹
+.idea/
+# 忽略打包过后的target文件
+target/
+
+# 忽略私有配置文件
+application-private.properties

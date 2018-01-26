@@ -1,2 +1,2 @@
 # smzdm
-定时抓取什么值得买网站的内容，挑选出“值”的数据发送邮件通知
+ 需要根据 application-public 模板配置 application-private 

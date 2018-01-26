@@ -1,0 +1,10 @@
+{
+  "1": {
+    "email": "1831799660@qq.com",
+    "enableStartHour": 7,
+    "enableEndHour": 22,
+    "filters": [
+      "SimpleFilterService"
+    ]
+  }
+}
