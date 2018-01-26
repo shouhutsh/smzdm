@@ -1,8 +1,17 @@
 package cn.edu.zzti.pi.smzdm.model;
 
+/**
+ * 用户模型
+ */
 public class UserModel extends BaseModel {
 
+    /**
+     * 用户主键
+     */
     private String id;
+    /**
+     * 用户名
+     */
     private String name;
 
     public String getId() {

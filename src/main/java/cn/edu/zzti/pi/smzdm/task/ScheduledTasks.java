@@ -32,6 +32,9 @@ public class ScheduledTasks {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * SMZDM 数据列表接口，timesort 类时间戳（timestamp / 10）
+     */
     private static final String URL_TEMPLATE = "https://m.smzdm.com/ajax_home_list_show?timesort=%s";
 
     @Value("${spring.mail.username}")
@@ -58,7 +61,10 @@ public class ScheduledTasks {
             Long start = DateUtils.getTimestamp();
             Long end = DateUtils.getTimestamp(DateUtils.addDay(DateUtils.getNow(), -1));
 
-            for (Map.Entry<UserModel, List<ArticleModel>> e : doCrawlContent(start, end).entrySet()) {
+            Map<UserModel, List<ArticleModel>> map = doCrawlContent(start, end);
+            logger.info("抓取数据完成，准备发送用户邮件！");
+            for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
+                // 数据列表对 评论数 逆序排序
                 e.getValue().sort(Comparator.comparing(ArticleModel::getArticleComment).reversed());
                 sendMail(e.getKey(), e.getValue());
             }
@@ -113,6 +119,11 @@ public class ScheduledTasks {
         return map;
     }
 
+    /**
+     * 根据送入时间戳生成 timesort
+     * @param time
+     * @return
+     */
     private long getTimesort(Long time) {
         return time / 10;
     }
@@ -145,6 +156,13 @@ public class ScheduledTasks {
         return mailService.sendMail(mail);
     }
 
+    /**
+     * 使用FreeMarker填充模板
+     * @param template
+     * @param model
+     * @return
+     * @throws Exception
+     */
     private String buildContent(String template, Map<String, Object> model) throws Exception {
         return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfig.getTemplate(template), model);
     }

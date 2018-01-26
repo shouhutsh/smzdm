@@ -2,7 +2,11 @@ package cn.edu.zzti.pi.smzdm.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+/**
+ * SMZDM 数据模型
+ */
 public class ArticleModel extends BaseModel {
+
     @JSONField(name = "article_link_list")
     private String articleLinkList;
 

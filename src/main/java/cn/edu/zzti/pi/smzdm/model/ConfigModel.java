@@ -2,11 +2,26 @@ package cn.edu.zzti.pi.smzdm.model;
 
 import java.util.List;
 
+/**
+ * 用户配置模型
+ */
 public class ConfigModel extends BaseModel {
 
+    /**
+     * 用户邮箱
+     */
     private String email;
+    /**
+     * 用户配置过滤器列表
+     */
     private List<String> filters;
+    /**
+     * 用户设置开启发送通知的小时
+     */
     private Integer enableStartHour = 7;
+    /**
+     * 用户设置关闭发送通知的小时
+     */
     private Integer enableEndHour = 22;
 
     public String getEmail() {

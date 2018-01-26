@@ -2,6 +2,9 @@ package cn.edu.zzti.pi.smzdm.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+/**
+ * SMZDM 数据模型
+ */
 public class RedirectData extends BaseModel {
 
     @JSONField(name = "link_type")
