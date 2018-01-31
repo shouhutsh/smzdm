@@ -53,7 +53,7 @@ public class ArticleModel extends BaseModel {
     private String articleUnworthy;
 
     @JSONField(name = "article_comment")
-    private String articleComment;
+    private Integer articleComment;
 
     @JSONField(name = "article_logo_class")
     private String articleLogoClass;
@@ -235,11 +235,11 @@ public class ArticleModel extends BaseModel {
         this.articleUnworthy = articleUnworthy;
     }
 
-    public String getArticleComment() {
+    public Integer getArticleComment() {
         return articleComment;
     }
 
-    public void setArticleComment(String articleComment) {
+    public void setArticleComment(Integer articleComment) {
         this.articleComment = articleComment;
     }
 
