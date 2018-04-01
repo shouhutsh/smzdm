@@ -106,7 +106,7 @@ public class ScheduledTasks {
             JSONObject json = JSONObject.parseObject(Sender.send(request));
             List<ArticleModel> articleModels = JSONObject.parseArray(json.getString("data"), ArticleModel.class);
             for (ArticleModel article : articleModels) {
-                timesort = Long.valueOf(article.getTimeSort());
+                timesort = Long.valueOf(article.getTimesort());
 
                 for (UserModel user : userModels) {
                     ConfigModel config = configService.getUserConfig(user);
