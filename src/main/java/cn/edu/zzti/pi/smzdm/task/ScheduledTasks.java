@@ -51,6 +51,20 @@ public class ScheduledTasks {
     @Autowired
     private Configuration freemarkerConfig;
 
+    // 简单为Controller提供一个视图
+    private static volatile Map<UserModel, List<ArticleModel>> CACHE;
+
+    public List<ArticleModel> getArticleModels(String userName) {
+        if (null != userName && CACHE != null) {
+            for (Map.Entry<UserModel, List<ArticleModel>> e : CACHE.entrySet()) {
+                if (e.getKey().getName().equals(userName)) {
+                    return e.getValue();
+                }
+            }
+        }
+        return Collections.EMPTY_LIST;
+    }
+
     /**
      * 定时抓取SMZDM内容
      */
@@ -62,6 +76,7 @@ public class ScheduledTasks {
             Long end = DateUtils.getTimestamp(DateUtils.addDay(DateUtils.getNow(), -1));
 
             Map<UserModel, List<ArticleModel>> map = doCrawlContent(start, end);
+            CACHE = map;
             logger.info("抓取数据完成，准备发送用户邮件！");
             for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
                 // 数据列表对 评论数 逆序排序
