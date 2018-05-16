@@ -165,7 +165,7 @@ public class ScheduledTasks {
 
         MailModel mail = new MailModel();
         mail.setFrom(fromEMail);
-        mail.setTo(new String[]{config.getEmail()});
+        mail.setTo(config.getEmail().split(","));
         mail.setSubject("什么值得买");
         mail.setText(text);
         return mailService.sendMail(mail);
