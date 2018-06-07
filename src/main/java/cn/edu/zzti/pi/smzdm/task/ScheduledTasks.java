@@ -9,7 +9,7 @@ import cn.edu.zzti.pi.smzdm.service.MailService;
 import cn.edu.zzti.pi.smzdm.service.UserService;
 import cn.edu.zzti.pi.smzdm.service.filter.FilterProxy;
 import cn.edu.zzti.pi.smzdm.utils.DateUtils;
-import cn.edu.zzti.pi.smzdm.utils.MapUtils;
+import cn.edu.zzti.pi.smzdm.utils.CollectionUtils;
 import cn.edu.zzti.pi.smzdm.utils.Sender;
 import com.alibaba.fastjson.JSONObject;
 import freemarker.template.Configuration;
@@ -80,8 +80,9 @@ public class ScheduledTasks {
             logger.info("抓取数据完成，准备发送用户邮件！");
             for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
                 // 数据列表对 评论数 逆序排序
-                e.getValue().sort(Comparator.comparing(ArticleModel::getArticleComment).reversed());
-                sendMail(e.getKey(), e.getValue());
+                List<ArticleModel> articles = CollectionUtils.unique(e.getValue(), Comparator.comparing(ArticleModel::getArticleId));
+                articles.sort(Comparator.comparing(ArticleModel::getArticleComment).reversed());
+                sendMail(e.getKey(), articles);
             }
         } catch (Exception e) {
             logger.error("定时抓取SMZDM任务失败！", e);
@@ -126,7 +127,7 @@ public class ScheduledTasks {
                 for (UserModel user : userModels) {
                     ConfigModel config = configService.getUserConfig(user);
                     if (filterProxy.isWorth(config, article)) {
-                        MapUtils.put(map, user, article);
+                        CollectionUtils.put(map, user, article);
                     }
                 }
             }
