@@ -76,12 +76,13 @@ public class ScheduledTasks {
             Long end = DateUtils.getTimestamp(DateUtils.addDay(DateUtils.getNow(), -1));
 
             Map<UserModel, List<ArticleModel>> map = doCrawlContent(start, end);
-            CACHE = map;
             logger.info("抓取数据完成，准备发送用户邮件！");
             for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
                 // 数据列表对 评论数 逆序排序
                 List<ArticleModel> articles = CollectionUtils.unique(e.getValue(), Comparator.comparing(ArticleModel::getArticleId));
                 articles.sort(Comparator.comparing(ArticleModel::getArticleComment).reversed());
+
+                CACHE.put(e.getKey(), articles);
                 sendMail(e.getKey(), articles);
             }
         } catch (Exception e) {
