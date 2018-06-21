@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 定时任务
@@ -52,7 +53,7 @@ public class ScheduledTasks {
     private Configuration freemarkerConfig;
 
     // 简单为Controller提供一个视图
-    private static volatile Map<UserModel, List<ArticleModel>> CACHE;
+    private static volatile Map<UserModel, List<ArticleModel>> CACHE = new ConcurrentHashMap<>();
 
     public List<ArticleModel> getArticleModels(String userName) {
         if (null != userName && CACHE != null) {
