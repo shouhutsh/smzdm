@@ -46,7 +46,7 @@ public class ArticleModel extends BaseModel {
     private String articleTeseTags;
 
     @JSONField(name = "article_comment")
-    private Integer articleComment;
+    private String articleComment;
 
     @JSONField(name = "article_unworthy")
     private String articleUnworthy;
@@ -251,11 +251,11 @@ public class ArticleModel extends BaseModel {
         this.articleTeseTags = articleTeseTags;
     }
 
-    public Integer getArticleComment() {
+    public String getArticleComment() {
         return articleComment;
     }
 
-    public void setArticleComment(Integer articleComment) {
+    public void setArticleComment(String articleComment) {
         this.articleComment = articleComment;
     }
 

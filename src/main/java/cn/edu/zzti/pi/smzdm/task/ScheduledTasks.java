@@ -11,6 +11,7 @@ import cn.edu.zzti.pi.smzdm.service.filter.FilterProxy;
 import cn.edu.zzti.pi.smzdm.utils.DateUtils;
 import cn.edu.zzti.pi.smzdm.utils.CollectionUtils;
 import cn.edu.zzti.pi.smzdm.utils.Sender;
+import cn.edu.zzti.pi.smzdm.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import freemarker.template.Configuration;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -81,7 +82,9 @@ public class ScheduledTasks {
             for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
                 // 数据列表对 评论数 逆序排序
                 List<ArticleModel> articles = CollectionUtils.unique(e.getValue(), Comparator.comparing(ArticleModel::getArticleId));
-                articles.sort(Comparator.comparing(ArticleModel::getArticleComment).reversed());
+                articles.sort((o1, o2) -> {
+                    return - StringUtils.parse2Integer(o1.getArticleComment()).compareTo(StringUtils.parse2Integer(o2.getArticleComment()));
+                });
 
                 CACHE.put(e.getKey(), articles);
                 sendMail(e.getKey(), articles);
