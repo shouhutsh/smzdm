@@ -1,15 +1,12 @@
 package cn.edu.zzti.pi.smzdm.task;
 
-import cn.edu.zzti.pi.smzdm.model.ArticleModel;
-import cn.edu.zzti.pi.smzdm.model.ConfigModel;
-import cn.edu.zzti.pi.smzdm.model.MailModel;
-import cn.edu.zzti.pi.smzdm.model.UserModel;
+import cn.edu.zzti.pi.smzdm.model.*;
 import cn.edu.zzti.pi.smzdm.service.ConfigService;
 import cn.edu.zzti.pi.smzdm.service.MailService;
 import cn.edu.zzti.pi.smzdm.service.UserService;
 import cn.edu.zzti.pi.smzdm.service.filter.FilterProxy;
-import cn.edu.zzti.pi.smzdm.utils.DateUtils;
 import cn.edu.zzti.pi.smzdm.utils.CollectionUtils;
+import cn.edu.zzti.pi.smzdm.utils.DateUtils;
 import cn.edu.zzti.pi.smzdm.utils.Sender;
 import cn.edu.zzti.pi.smzdm.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -33,11 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ScheduledTasks {
 
     Logger logger = LoggerFactory.getLogger(getClass());
-
-    /**
-     * SMZDM 数据列表接口，timesort 类时间戳（timestamp / 10）
-     */
-    private static final String URL_TEMPLATE = "https://m.smzdm.com/ajax_home_list_show?timesort=%s";
 
     @Value("${spring.mail.username}")
     private String fromEMail;
@@ -70,7 +62,7 @@ public class ScheduledTasks {
     /**
      * 定时抓取SMZDM内容
      */
-    @Scheduled(fixedRate = 60 * 60 * 1000)
+    @Scheduled(fixedRate = Constants.TASK_SMZDM_CRAWL_FIXED_RATE)
     public void crawlContentForSmzdmTask() {
         try {
             logger.info("开始定时抓取SMZDM任务！");
@@ -95,6 +87,30 @@ public class ScheduledTasks {
     }
 
     /**
+     * SMZDM签到
+     */
+    @Scheduled(fixedRate = Constants.TASK_SMZDM_CHECKIN_FIXED_RATE)
+    public void smzdmCheckin() {
+        try {
+            for (UserModel user : userService.selectAllUsers()) {
+                ConfigModel config = configService.getUserConfig(user);
+                if (StringUtils.isEmpty(config.getSmzdmName()) || StringUtils.isEmpty(config.getSmzdmPassword())) {
+                    continue;
+                }
+
+                boolean success = smzdmCheckin(config.getSmzdmName(), config.getSmzdmPassword());
+                if (success) {
+                    logger.info("用户{}自动签到成功！", user.getName());
+                } else {
+                    logger.warn("用户{}自动签到失败！", user.getName());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("自动签到失败！", e);
+        }
+    }
+
+    /**
      * 抓取时间区间内的消息，并归档
      *
      * @param startTimestamp
@@ -115,7 +131,7 @@ public class ScheduledTasks {
 
         long timesort = getTimesort(startTimestamp);
         while (timesort > getTimesort(endTimestamp)) {
-            String url = String.format(URL_TEMPLATE, timesort);
+            String url = String.format(Constants.ARTICLES_URL, timesort);
 
             HttpRequestBase request = Sender.buildGetRequest(url);
             request.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
@@ -138,6 +154,42 @@ public class ScheduledTasks {
             }
         }
         return map;
+    }
+
+    /**
+     * smzdm自动签到
+     * @param name
+     * @param password
+     * @return
+     */
+    private boolean smzdmCheckin(String name, String password) {
+        try {
+            HttpRequestBase req = Sender.buildGetRequest(Constants.SMZDM_URL);
+            setHeader(req);
+            Sender.send(req);
+
+            Map<String, String> map = new HashMap<>();
+            map.put("username", name);
+            map.put("password", password);
+
+            req = Sender.buildPostRequest(Constants.LOGIN_URL, map);
+            setHeader(req);
+            Sender.send(req);
+
+            req = Sender.buildGetRequest(Constants.CHECKIN_URL);
+            setHeader(req);
+            JSONObject json = JSONObject.parseObject(Sender.send(req));
+            return json.getIntValue("error_code") == 0;
+        } catch (Exception e) {
+            logger.error("SMZDM自动签到失败！", e);
+            return false;
+        }
+    }
+
+    private static void setHeader(HttpRequestBase request) {
+        request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:20.0) Gecko/20100101 Firefox/20.0");
+        request.setHeader("Host", "zhiyou.smzdm.com");
+        request.setHeader("Referer", "http://www.smzdm.com/");
     }
 
     /**

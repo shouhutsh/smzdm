@@ -8,6 +8,15 @@ import java.util.List;
 public class ConfigModel extends BaseModel {
 
     /**
+     * 什么值得买用户名
+     */
+    private String smzdmName;
+    /**
+     * 什么值得买密码
+     */
+    private String smzdmPassword;
+
+    /**
      * 用户邮箱
      */
     private String email;
@@ -23,6 +32,22 @@ public class ConfigModel extends BaseModel {
      * 用户设置关闭发送通知的小时
      */
     private Integer enableEndHour = 22;
+
+    public String getSmzdmName() {
+        return smzdmName;
+    }
+
+    public void setSmzdmName(String smzdmName) {
+        this.smzdmName = smzdmName;
+    }
+
+    public String getSmzdmPassword() {
+        return smzdmPassword;
+    }
+
+    public void setSmzdmPassword(String smzdmPassword) {
+        this.smzdmPassword = smzdmPassword;
+    }
 
     public String getEmail() {
         return email;

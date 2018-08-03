@@ -2,6 +2,10 @@ package cn.edu.zzti.pi.smzdm.utils;
 
 public final class StringUtils {
 
+    public static boolean isEmpty(String str) {
+        return null == str || str.length() == 0;
+    }
+
     public static String underline2Camel(String source) {
         boolean upper = false;
         StringBuilder sb = new StringBuilder();
