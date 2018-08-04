@@ -5,10 +5,7 @@ import cn.edu.zzti.pi.smzdm.service.ConfigService;
 import cn.edu.zzti.pi.smzdm.service.MailService;
 import cn.edu.zzti.pi.smzdm.service.UserService;
 import cn.edu.zzti.pi.smzdm.service.filter.FilterProxy;
-import cn.edu.zzti.pi.smzdm.utils.CollectionUtils;
-import cn.edu.zzti.pi.smzdm.utils.DateUtils;
-import cn.edu.zzti.pi.smzdm.utils.Sender;
-import cn.edu.zzti.pi.smzdm.utils.StringUtils;
+import cn.edu.zzti.pi.smzdm.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import freemarker.template.Configuration;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -70,7 +67,6 @@ public class ScheduledTasks {
             Long end = DateUtils.getTimestamp(DateUtils.addDay(DateUtils.getNow(), -1));
 
             Map<UserModel, List<ArticleModel>> map = doCrawlContent(start, end);
-            logger.info("抓取数据完成，准备发送用户邮件！");
             for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
                 // 数据列表对 评论数 逆序排序
                 List<ArticleModel> articles = CollectionUtils.unique(e.getValue(), Comparator.comparing(ArticleModel::getArticleId));
@@ -79,7 +75,7 @@ public class ScheduledTasks {
                 });
 
                 CACHE.put(e.getKey(), articles);
-                sendMail(e.getKey(), articles);
+//                sendMail(e.getKey(), articles);
             }
         } catch (Exception e) {
             logger.error("定时抓取SMZDM任务失败！", e);
@@ -93,6 +89,7 @@ public class ScheduledTasks {
     public void smzdmCheckin() {
         try {
             for (UserModel user : userService.selectAllUsers()) {
+                logger.info("为用户{}自动签到！", user.getName());
                 ConfigModel config = configService.getUserConfig(user);
                 if (StringUtils.isEmpty(config.getSmzdmName()) || StringUtils.isEmpty(config.getSmzdmPassword())) {
                     continue;
@@ -164,9 +161,11 @@ public class ScheduledTasks {
      */
     private boolean smzdmCheckin(String name, String password) {
         try {
+            Session session = Sender.buildSession();
+
             HttpRequestBase req = Sender.buildGetRequest(Constants.SMZDM_URL);
             setHeader(req);
-            Sender.send(req);
+            session.send(req);
 
             Map<String, String> map = new HashMap<>();
             map.put("username", name);
@@ -174,11 +173,13 @@ public class ScheduledTasks {
 
             req = Sender.buildPostRequest(Constants.LOGIN_URL, map);
             setHeader(req);
-            Sender.send(req);
+            JSONObject json = JSONObject.parseObject(session.send(req));
+            logger.info("登陆接收到的报文：{}", json);
 
             req = Sender.buildGetRequest(Constants.CHECKIN_URL);
             setHeader(req);
-            JSONObject json = JSONObject.parseObject(Sender.send(req));
+            json = JSONObject.parseObject(session.send(req));
+            logger.info("签到接收到的报文：{}", json);
             return json.getIntValue("error_code") == 0;
         } catch (Exception e) {
             logger.error("SMZDM自动签到失败！", e);
