@@ -40,6 +40,16 @@ public final class StringUtils {
     }
 
     /**
+     * 简单将类似 1.2K -> 1200
+     * @param num
+     * @return
+     */
+    public static Long parse2Long(String num) {
+        if (null == num || num.length() <= 0) return null;
+        return Long.valueOf(num);
+    }
+
+    /**
      * 简单将单位转成相应倍数，解析失败返回 1
      *      K -> 1000
      *      M -> 1000 * 1000

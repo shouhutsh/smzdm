@@ -68,12 +68,7 @@ public class ScheduledTasks {
 
             Map<UserModel, List<ArticleModel>> map = doCrawlContent(start, end);
             for (Map.Entry<UserModel, List<ArticleModel>> e : map.entrySet()) {
-                // 数据列表对 评论数 逆序排序
                 List<ArticleModel> articles = CollectionUtils.unique(e.getValue(), Comparator.comparing(ArticleModel::getArticleId));
-                articles.sort((o1, o2) -> {
-                    return - StringUtils.parse2Integer(o1.getArticleComment()).compareTo(StringUtils.parse2Integer(o2.getArticleComment()));
-                });
-
                 CACHE.put(e.getKey(), articles);
 //                sendMail(e.getKey(), articles);
             }
