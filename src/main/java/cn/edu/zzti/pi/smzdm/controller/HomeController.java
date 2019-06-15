@@ -74,10 +74,10 @@ public class HomeController {
             public void sort(List<ArticleModel> list) {
                 long now = System.currentTimeMillis();
                 list.sort((o1, o2) -> {
-                    Float comment1 = Float.parseFloat(o1.getArticleComment());
+                    Float comment1 = new Float(StringUtils.parse2Integer(o1.getArticleComment()));
                     Float postTime1 = new Float(now - StringUtils.parse2Long(o1.getTimesort()) * 10);
 
-                    Float comment2 = Float.parseFloat(o2.getArticleComment());
+                    Float comment2 = new Float(StringUtils.parse2Integer(o2.getArticleComment()));
                     Float postTime2 = new Float(now - StringUtils.parse2Long(o2.getTimesort()) * 10);
 
                     return -Float.valueOf(comment1 / postTime1).compareTo(Float.valueOf(comment2 / postTime2));
